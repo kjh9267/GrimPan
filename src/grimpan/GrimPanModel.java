@@ -1,43 +1,57 @@
 package grimpan;
 
-import javafx.geometry.Point2D;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Shape;
-
-import java.io.*;
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.Shape;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 public class GrimPanModel {
 	
-	private int editState = Utils.SHAPE_PENCIL;
+	private GrimPanFrameMain mainFrame = null;
+	private int editState = Util.SHAPE_LINE;
 
+	public final ShapeBuilder[] SHAPE_BUILDERS = {
+		new RegularShapeBuilder(this),
+		new OvalShapeBuilder(this),
+		new PolygonShapeBuilder(this),
+		new LineShapeBuilder(this),
+		new PencilShapeBuilder(this),
+		new MoveShapeBuilder(this),
+	};
+	public ShapeBuilder sb = null;
 	
-	private float shapeStrokeWidth = 10f;
-	private Color shapeStrokeColor = Color.BLACK;
-	private boolean shapeStroke = true;
+	private float shapeStrokeWidth = 1f;
+	private Color shapeStrokeColor = null;
 	private boolean shapeFill = false;
 	private Color shapeFillColor = null;
 	
-	public ArrayList<Shape> shapeList = null;
+	public ArrayList<GrimShape> shapeList = null;
 	
-	private Point2D startMousePosition = null;
-	private Point2D currMousePosition = null;
-	private Point2D prevMousePosition = null;
+	private Point mousePosition = null;
+	private Point clickedMousePosition = null;
+	private Point lastMousePosition = null;
 	
 	public Shape curDrawShape = null;
-	public ArrayList<Point2D> polygonPoints = null;
+	public ArrayList<Point> polygonPoints = null;
 	private int selectedShape = -1;
 	
 	private int nPolygon = 3;
 	
 	private File saveFile = null;
 
-	public GrimPanModel(){
-		//this.mainFrame = frame;
-		this.shapeList = new ArrayList<Shape>();
+	public GrimPanModel(GrimPanFrameMain frame){
+		this.mainFrame = frame;
+		this.shapeList = new ArrayList<GrimShape>();
 		this.shapeStrokeColor = Color.BLACK;
-		this.shapeFillColor = Color.TRANSPARENT;
-		this.polygonPoints = new ArrayList<Point2D>();
+		this.shapeFillColor = Color.BLACK;
+		this.polygonPoints = new ArrayList<Point>();
 	}
 
 	public int getEditState() {
@@ -46,29 +60,37 @@ public class GrimPanModel {
 
 	public void setEditState(int editState) {
 		this.editState = editState;
+		if (editState == Util.EDIT_MOVE){
+			mainFrame.modeLBL.setText(String.format("Mode: %s  ", "�̵� "));
+		}
+		else {
+			mainFrame.modeLBL.setText(String.format("Mode: %s  ", "�߰� "));
+			mainFrame.shapeLbl.setText(String.format("Shape: %s  ", Util.SHAPE_NAME[this.getEditState()]));
+		}
+		this.sb = SHAPE_BUILDERS[this.getEditState()];
 	}
 
-	public Point2D getStartMousePosition() {
-		return startMousePosition;
+	public Point getMousePosition() {
+		return mousePosition;
 	}
 
-	public void setStartMousePosition(Point2D mousePosition) {
-		this.startMousePosition = mousePosition;
+	public void setMousePosition(Point mousePosition) {
+		this.mousePosition = mousePosition;
 	}
-	public Point2D getPrevMousePosition() {
-		return prevMousePosition;
-	}
-
-	public void setPrevMousePosition(Point2D mousePosition) {
-		this.prevMousePosition = mousePosition;
+	public Point getLastMousePosition() {
+		return lastMousePosition;
 	}
 
-	public Point2D getCurrMousePosition() {
-		return currMousePosition;
+	public void setLastMousePosition(Point mousePosition) {
+		this.lastMousePosition = mousePosition;
 	}
 
-	public void setCurrMousePosition(Point2D clickedMousePosition) {
-		this.currMousePosition = clickedMousePosition;
+	public Point getClickedMousePosition() {
+		return clickedMousePosition;
+	}
+
+	public void setClickedMousePosition(Point clickedMousePosition) {
+		this.clickedMousePosition = clickedMousePosition;
 	}
 	public void readShapeFromSaveFile(File saveFile) {
 		this.saveFile = saveFile;
@@ -76,7 +98,7 @@ public class GrimPanModel {
 		try {
 			input =
 				new ObjectInputStream(new FileInputStream(this.saveFile));
-			this.shapeList = (ArrayList<Shape>) input.readObject();
+			this.shapeList = (ArrayList<GrimShape>) input.readObject();
 			input.close();
 
 		} catch (ClassNotFoundException e) {
@@ -116,7 +138,7 @@ public class GrimPanModel {
 	 */
 	public void setSaveFile(File saveFile) {
 		this.saveFile = saveFile;
-		//mainFrame.setTitle("�׸��� - "+saveFile.getPath());
+		mainFrame.setTitle("�׸��� - "+saveFile.getPath());
 	}
 	/**
 	 * @return the nPolygon
@@ -200,14 +222,6 @@ public class GrimPanModel {
 	 */
 	public void setShapeStrokeWidth(float shapeStrokeWidth) {
 		this.shapeStrokeWidth = shapeStrokeWidth;
-	}
-
-	public boolean isShapeStroke() {
-		return shapeStroke;
-	}
-
-	public void setShapeStroke(boolean shapeStroke) {
-		this.shapeStroke = shapeStroke;
 	}
 
 	
