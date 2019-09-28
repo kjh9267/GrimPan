@@ -1,13 +1,13 @@
 package grimpan.command;
 
 import grimpan.core.GrimPanModel;
-import grimpan.shape.GrimShape;
+import grimpan.svg.SVGGrimShape;
 
 public class AddCommand implements Command {
 
 	GrimPanModel model = null;
-	GrimShape grimShape = null;
-	public AddCommand(GrimPanModel model, GrimShape grimShape){
+	SVGGrimShape grimShape = null;
+	public AddCommand(GrimPanModel model, SVGGrimShape grimShape){
 		this.model = model;
 		this.grimShape = grimShape;
 	}

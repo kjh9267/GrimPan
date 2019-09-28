@@ -1,165 +1,143 @@
 package grimpan.core;
 
-import java.awt.Color;
-import java.awt.Point;
-import java.awt.Shape;
+import grimpan.command.Command;
+import grimpan.state.*;
+import grimpan.svg.SVGGrimShape;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Shape;
+
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Stack;
 
-import grimpan.command.Command;
-import grimpan.shape.DecorateShapeBuilder;
-import grimpan.shape.DeleteShapeBuilder;
-import grimpan.shape.IGrimShape;
-import grimpan.shape.LineShapeBuilder;
-import grimpan.shape.MoveShapeBuilder;
-import grimpan.shape.OvalShapeBuilder;
-import grimpan.shape.PencilShapeBuilder;
-import grimpan.shape.PolygonShapeBuilder;
-import grimpan.shape.RegularShapeBuilder;
-import grimpan.shape.ShapeBuilder;
-
-public class GrimPanModel {
+public class GrimPanModel implements Observable {
 	
 	private volatile static GrimPanModel uniqueModelInstance;
-	
-	private GrimPanFrameView frameView = null;
-	private GrimPanController controller = null;
-	
-	private String defaultDir = "/home/cskim/temp/";
-	
-	private int editState = Util.SHAPE_LINE;
+	public GrimPanController control;
 
-	public final ShapeBuilder[] SHAPE_BUILDERS = {
-		new RegularShapeBuilder(this),
-		new OvalShapeBuilder(this),
-		new PolygonShapeBuilder(this),
-		new LineShapeBuilder(this),
-		new PencilShapeBuilder(this),
-		new MoveShapeBuilder(this),
-		new DeleteShapeBuilder(this),
-		new DecorateShapeBuilder(this),
-		new DecorateShapeBuilder(this),
-		new DecorateShapeBuilder(this),
-		new DecorateShapeBuilder(this),
-	};
-	public ShapeBuilder sb = null;
+	private ShapeFactory sf = ShapeFactory.getInstance(this);
 	
-	private float shapeStrokeWidth = 1f;
-	private Color shapeStrokeColor = null;
+	public EditState editState = null;
+	public EditState savedAddState = null;
+	public final EditState STATE_REGULAR = new RegularBuilderState(this, sf);
+	public final EditState STATE_OVAL = new OvalBuilderState(this, sf);
+	public final EditState STATE_POLYGON = new PolygonBuilderState(this, sf);
+	public final EditState STATE_LINE = new LineBuilderState(this, sf);
+	public final EditState STATE_PENCIL = new PencilBuilderState(this, sf);
+	public final EditState STATE_MOVE = new MoveBuilderState(this,sf);
+	public final EditState STATE_LOADING = new LoadingState();
+
+	private double shapeStrokeWidth = 10;
+	private Color shapeStrokeColor = Color.BLACK;
+	private boolean shapeStroke = true;
 	private boolean shapeFill = false;
 	private Color shapeFillColor = null;
 	
-	public ArrayList<IGrimShape> shapeList = null;
+	public ObservableList<SVGGrimShape> shapeList = null;
 	
-	private Point mousePosition = null;
-	private Point clickedMousePosition = null;
-	private Point lastMousePosition = null;
+	private Point2D startMousePosition = null;
+	private Point2D currMousePosition = null;
+	private Point2D prevMousePosition = null;
 	
-	public Shape curDrawShape = null;
-	public ArrayList<Point> polygonPoints = null;
+	public SVGGrimShape curDrawShape = null;
+	public ArrayList<Point2D> polygonPoints = null;
 	private int selectedShapeIndex = -1;
-	private IGrimShape savedPositionShape = null;
 	
 	private int nPolygon = 3;
 	
 	private File saveFile = null;
-	private File recoverFile = null;
+
+	private double paneWidth = 0;
+	private double paneHeight = 0;
+	
+	private Point2D movedPos = null;
+	
+	private ArrayList<InvalidationListener> listenerList = null;
 	public Stack<Command> undoCommandStack = null;
 	
-	private GrimPanModel(){
-		this.shapeList = new ArrayList<IGrimShape>();
-		this.shapeStrokeColor = Color.BLACK;
-		this.shapeFillColor = null;
-		this.polygonPoints = new ArrayList<Point>();
-		this.recoverFile = new File(defaultDir+"noname.rcv");
-		this.undoCommandStack = new Stack<Command>();
-	}
-	public static GrimPanModel getInstance() {
+	public PropertyManager grimpanPM = null;
+
+
+	public static GrimPanModel getInstance(GrimPanController control) {
 		if (uniqueModelInstance == null) {
 			synchronized (GrimPanModel.class) {
 				if (uniqueModelInstance == null) {
-					uniqueModelInstance = new GrimPanModel();
+					uniqueModelInstance = new GrimPanModel(control);
 				}
 			}
 		}
 		return uniqueModelInstance;
 	}
+	private GrimPanModel(GrimPanController control){
+		
+		this.control = control;
+		this.shapeList = FXCollections.observableArrayList();
+		this.shapeStrokeColor = Color.BLACK;
+		this.shapeFillColor = Color.TRANSPARENT;
+		this.polygonPoints = new ArrayList<Point2D>();
+		this.listenerList = new ArrayList<InvalidationListener>();
 
-	/**
-	 * @return the mainFrame
-	 */
-	public GrimPanFrameView getFrameView() {
-		return frameView;
+		this.setEditState(STATE_PENCIL);
+		this.notifyListeners();
+		
+		this.undoCommandStack = new Stack<Command>();
+		this.grimpanPM = new SimplePropertyManager("/grimpan.properties");
+		this.shapeStrokeWidth = Double.parseDouble(grimpanPM.getPanProperties().getProperty("default.stroke.width"));
+		this.shapeStrokeColor = Color.web(grimpanPM.getPanProperties().getProperty("default.stroke.color"));
+		this.shapeFillColor = Color.web(grimpanPM.getPanProperties().getProperty("default.fill.color"));
+
 	}
-	/**
-	 * @param mainFrame the mainFrame to set
-	 */
-	public void setFrameView(GrimPanFrameView mainFrame) {
-		this.frameView = mainFrame;
+	@Override
+	public void addListener(InvalidationListener li) {
+		this.listenerList.add(li);
+		
 	}
-	public int getEditState() {
+	@Override
+	public void removeListener(InvalidationListener li) {
+		this.listenerList.remove(li);
+		
+	}
+	public void notifyListeners() {
+		for (InvalidationListener lis : this.listenerList) {
+			lis.invalidated(this);
+		}
+	}
+
+	public EditState getEditState() {
 		return editState;
 	}
 
-	public void setEditState(int editState) {
+	public void setEditState(EditState editState) {
 		this.editState = editState;
-		switch (editState) {
-		case Util.EDIT_MOVE: 
-			frameView.modeLBL.setText(String.format("Mode: %s  ", "�̵� "));
-			break;
-		case Util.DECO_GLASS: 
-		case Util.DECO_TEX: 
-		case Util.DECO_BALL: 
-		case Util.DECO_TRANS: 
-			frameView.modeLBL.setText(String.format("Mode: %s  ", "��� "));
-			break;
-		default: 
-			frameView.modeLBL.setText(String.format("Mode: %s  ", "�߰� "));
-			frameView.shapeLbl.setText(String.format("Shape: %s  ", Util.SHAPE_NAME[this.getEditState()]));
-		}
-		this.sb = SHAPE_BUILDERS[this.getEditState()];
+		notifyListeners();
 	}
 
-	public Point getMousePosition() {
-		return mousePosition;
+	public Point2D getStartMousePosition() {
+		return startMousePosition;
 	}
 
-	public void setMousePosition(Point mousePosition) {
-		this.mousePosition = mousePosition;
+	public void setStartMousePosition(Point2D mousePosition) {
+		this.startMousePosition = mousePosition;
 	}
-	public Point getLastMousePosition() {
-		return lastMousePosition;
-	}
-
-	public void setLastMousePosition(Point mousePosition) {
-		this.lastMousePosition = mousePosition;
+	public Point2D getPrevMousePosition() {
+		return prevMousePosition;
 	}
 
-	public Point getClickedMousePosition() {
-		return clickedMousePosition;
+	public void setPrevMousePosition(Point2D mousePosition) {
+		this.prevMousePosition = mousePosition;
 	}
 
-	public void setClickedMousePosition(Point clickedMousePosition) {
-		this.clickedMousePosition = clickedMousePosition;
+	public Point2D getCurrMousePosition() {
+		return currMousePosition;
 	}
-	public void saveGrimPanData(File saveFile){
-		ObjectOutputStream output;
-		try {
-			output = new ObjectOutputStream(new FileOutputStream(saveFile));
-			output.writeObject(this.shapeList);
-			output.close();
-		} catch (FileNotFoundException e) {
-			System.err.println("File not Found");
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.err.println("IO Exception");
-			e.printStackTrace();
-		}
+
+	public void setCurrMousePosition(Point2D clickedMousePosition) {
+		this.currMousePosition = clickedMousePosition;
 	}
 	/**
 	 * @return the saveFile
@@ -173,7 +151,7 @@ public class GrimPanModel {
 	 */
 	public void setSaveFile(File saveFile) {
 		this.saveFile = saveFile;
-		frameView.setTitle("�׸��� - "+saveFile.getPath());
+		//mainFrame.setTitle("�׸��� - "+saveFile.getPath());
 	}
 	/**
 	 * @return the nPolygon
@@ -197,10 +175,33 @@ public class GrimPanModel {
 	}
 
 	/**
-	 * @param selectedShapeIndex the selectedShape to set
+	 * @param selectedShape the selectedShape to set
 	 */
-	public void setSelectedShapeIndex(int selectedShapeIndex) {
-		this.selectedShapeIndex = selectedShapeIndex;
+	public void setSelectedShapeIndex(int selIndex) {
+		this.selectedShapeIndex = selIndex;
+	}
+	
+	public void getSelectedShape(){
+		int selIndex = -1;
+		Shape shape = null;
+		for (int i=this.shapeList.size()-1; i >= 0; --i){
+			shape = this.shapeList.get(i).getShape();
+			if (shape.contains(this.getStartMousePosition().getX(), this.getStartMousePosition().getY())){
+				selIndex = i;
+				break;
+			}
+		}
+		if (selIndex != -1){
+			Color scolor = (Color)shape.getStroke();
+			Color fcolor = (Color)shape.getFill();
+			if (shape.getStroke()!=Color.TRANSPARENT){
+				shape.setStroke(new Color (scolor.getRed(), scolor.getGreen(), scolor.getBlue(), 0.5));
+			}
+			if (shape.getFill()!=Color.TRANSPARENT){
+				shape.setFill(new Color (fcolor.getRed(), fcolor.getGreen(), fcolor.getBlue(), 0.5));
+			}
+		}
+		this.setSelectedShapeIndex(selIndex);
 	}
 
 	/**
@@ -229,13 +230,6 @@ public class GrimPanModel {
 	 */
 	public void setShapeFill(boolean shapeFill) {
 		this.shapeFill = shapeFill;
-		if (this.shapeFill) {
-			if (shapeFillColor==null)
-				this.shapeFillColor = Color.WHITE;
-		}
-		else {
-			this.shapeFillColor = null;
-		}
 	}
 
 	/**
@@ -255,63 +249,53 @@ public class GrimPanModel {
 	/**
 	 * @return the shapeStrokeWidth
 	 */
-	public float getShapeStrokeWidth() {
+	public double getShapeStrokeWidth() {
 		return shapeStrokeWidth;
 	}
 
 	/**
 	 * @param shapeStrokeWidth the shapeStrokeWidth to set
 	 */
-	public void setShapeStrokeWidth(float shapeStrokeWidth) {
+	public void setShapeStrokeWidth(double shapeStrokeWidth) {
 		this.shapeStrokeWidth = shapeStrokeWidth;
-		if (shapeStrokeWidth==0f) {
-			shapeStrokeColor = null;
-		}
 	}
-	/**
-	 * @return the defaultDir
-	 */
-	public String getDefaultDir() {
-		return defaultDir;
+
+	public boolean isShapeStroke() {
+		return shapeStroke;
 	}
-	/**
-	 * @param defaultDir the defaultDir to set
-	 */
-	public void setDefaultDir(String defaultDir) {
-		this.defaultDir = defaultDir;
+
+	public void setShapeStroke(boolean shapeStroke) {
+		this.shapeStroke = shapeStroke;
 	}
-	/**
-	 * @return the controller
-	 */
-	public GrimPanController getController() {
-		return controller;
+	public double getPaneWidth() {
+		return paneWidth;
 	}
-	/**
-	 * @param controller the controller to set
-	 */
-	public void setController(GrimPanController controller) {
-		this.controller = controller;
+	public void setPaneWidth(double paneWidth) {
+		this.paneWidth = paneWidth;
+		this.notifyListeners();
 	}
-	/**
-	 * @return the recoverFile
-	 */
-	public File getRecoverFile() {
-		return recoverFile;
+	public double getPaneHeight() {
+		return paneHeight;
 	}
-	/**
-	 * @param recoverFile the recoverFile to set
-	 */
-	public void setRecoverFile(File recoverFile) {
-		this.recoverFile = recoverFile;
+	public void setPaneHeight(double paneHeight) {
+		this.paneHeight = paneHeight;
+		this.notifyListeners();
 	}
-	/**
-	 * @param grimShape
-	 */
-	public void setSavedPositionShape(IGrimShape grimShape) {
-		savedPositionShape = grimShape.clone();
+	public String getSizeText() {
+		StringBuilder text = new StringBuilder("Size:");
+		if (paneWidth==0 || paneHeight==0)
+			return text.toString();
+		
+		text.append(String.valueOf((int)paneWidth));
+		text.append('x');
+		text.append(String.valueOf((int)paneHeight));
+
+		return text.toString();
 	}
-	public IGrimShape getSavedPositionShape() {
-		return savedPositionShape;		
+	public Point2D getMovedPos() {
+		return movedPos;
 	}
-	
+	public void setMovedPos(Point2D movedPos) {
+		this.movedPos = movedPos;
+	}
 }

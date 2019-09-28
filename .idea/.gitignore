@@ -1,4 +1,8 @@
 # Default ignored files
 /workspace.xml
 
-out
+# IntelliJ
+/out/
+
+# file: ~/.gitignore_global
+.idea

@@ -1,23 +1,18 @@
 package grimpan.command;
 
-import java.awt.Paint;
-import java.awt.Shape;
-
 import grimpan.core.GrimPanModel;
-import grimpan.shape.IGrimShape;
+import grimpan.core.ShapeFactory;
+import grimpan.svg.SVGGrimShape;
+import javafx.geometry.Point2D;
 
 public class MoveCommand implements Command {
 
 	GrimPanModel model = null;
-	Shape savedShape = null;
-	Paint savedPaint = null;
-	IGrimShape movedShape = null;
-	IGrimShape savedGrimShape = null;
-	public MoveCommand(GrimPanModel model, IGrimShape grimShape){
+	Point2D movedPos = null;
+	SVGGrimShape movedShape = null;
+	public MoveCommand(GrimPanModel model, Point2D moved){
 		this.model = model;
-		this.savedShape = grimShape.getShape();
-		this.savedPaint = grimShape.getGrimPaint();
-		this.savedGrimShape = grimShape;
+		this.movedPos = moved;
 	}
 
 	@Override
@@ -29,9 +24,8 @@ public class MoveCommand implements Command {
 	public void undo() {
 		int selIndex = model.shapeList.indexOf(movedShape);
 		if (selIndex != -1){
-			//model.shapeList.get(selIndex).setShape(savedShape);
-			//model.shapeList.get(selIndex).setGrimPaint(savedPaint);
-			model.shapeList.set(selIndex, savedGrimShape);
+			ShapeFactory.translateShape(movedShape.getShape(), -movedPos.getX(), -movedPos.getY());
+			//model.shapeList.set(selIndex, movedShape);
 		}
 		else {
 			System.out.println("undo moved GrimShape not found!!");
