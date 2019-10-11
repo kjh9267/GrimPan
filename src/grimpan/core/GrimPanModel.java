@@ -16,12 +16,12 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 public class GrimPanModel implements Observable {
-	
+
 	private volatile static GrimPanModel uniqueModelInstance;
 	public GrimPanController control;
 
 	private ShapeFactory sf = ShapeFactory.getInstance(this);
-	
+
 	public EditState editState = null;
 	public EditState savedAddState = null;
 	public final EditState STATE_REGULAR = new RegularBuilderState(this, sf);
@@ -37,29 +37,29 @@ public class GrimPanModel implements Observable {
 	private boolean shapeStroke = true;
 	private boolean shapeFill = false;
 	private Color shapeFillColor = null;
-	
+
 	public ObservableList<SVGGrimShape> shapeList = null;
-	
+
 	private Point2D startMousePosition = null;
 	private Point2D currMousePosition = null;
 	private Point2D prevMousePosition = null;
-	
+
 	public SVGGrimShape curDrawShape = null;
 	public ArrayList<Point2D> polygonPoints = null;
 	private int selectedShapeIndex = -1;
-	
+
 	private int nPolygon = 3;
-	
+
 	private File saveFile = null;
 
 	private double paneWidth = 0;
 	private double paneHeight = 0;
-	
+
 	private Point2D movedPos = null;
-	
+
 	private ArrayList<InvalidationListener> listenerList = null;
 	public Stack<Command> undoCommandStack = null;
-	
+
 	public PropertyManager grimpanPM = null;
 
 
@@ -74,7 +74,7 @@ public class GrimPanModel implements Observable {
 		return uniqueModelInstance;
 	}
 	private GrimPanModel(GrimPanController control){
-		
+
 		this.control = control;
 		this.shapeList = FXCollections.observableArrayList();
 		this.shapeStrokeColor = Color.BLACK;
@@ -84,7 +84,7 @@ public class GrimPanModel implements Observable {
 
 		this.setEditState(STATE_PENCIL);
 		this.notifyListeners();
-		
+
 		this.undoCommandStack = new Stack<Command>();
 		this.grimpanPM = new SimplePropertyManager("/grimpan.properties");
 		this.shapeStrokeWidth = Double.parseDouble(grimpanPM.getPanProperties().getProperty("default.stroke.width"));
@@ -95,12 +95,12 @@ public class GrimPanModel implements Observable {
 	@Override
 	public void addListener(InvalidationListener li) {
 		this.listenerList.add(li);
-		
+
 	}
 	@Override
 	public void removeListener(InvalidationListener li) {
 		this.listenerList.remove(li);
-		
+
 	}
 	public void notifyListeners() {
 		for (InvalidationListener lis : this.listenerList) {
@@ -180,7 +180,7 @@ public class GrimPanModel implements Observable {
 	public void setSelectedShapeIndex(int selIndex) {
 		this.selectedShapeIndex = selIndex;
 	}
-	
+
 	public void getSelectedShape(){
 		int selIndex = -1;
 		Shape shape = null;
@@ -285,7 +285,7 @@ public class GrimPanModel implements Observable {
 		StringBuilder text = new StringBuilder("Size:");
 		if (paneWidth==0 || paneHeight==0)
 			return text.toString();
-		
+
 		text.append(String.valueOf((int)paneWidth));
 		text.append('x');
 		text.append(String.valueOf((int)paneHeight));

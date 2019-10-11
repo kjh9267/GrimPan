@@ -27,27 +27,27 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 	public Stage parentStage;
 
 	private MenuItem menuNew;
-	private MenuItem menuOpen;    
-	private MenuItem menuSave;    
-	private MenuItem menuSaveAs;    
-	private MenuItem menuExit;    
-	private RadioMenuItem menuLine;    
-	private ToggleGroup shapeGroup;    
-	private RadioMenuItem menuPencil;    
-	private RadioMenuItem menuPolygon;    
-	private RadioMenuItem menuRegular;    
-	private RadioMenuItem menuOval;  
+	private MenuItem menuOpen;
+	private MenuItem menuSave;
+	private MenuItem menuSaveAs;
+	private MenuItem menuExit;
+	private RadioMenuItem menuLine;
+	private ToggleGroup shapeGroup;
+	private RadioMenuItem menuPencil;
+	private RadioMenuItem menuPolygon;
+	private RadioMenuItem menuRegular;
+	private RadioMenuItem menuOval;
 	private MenuItem menuUndo;
-	private MenuItem menuMove;    
-	private MenuItem menuDelete;    
-	private MenuItem menuStrokeWidth;    
-	private MenuItem menuStrokeColor;    
-	private MenuItem menuFillColor;    
-	private CheckMenuItem menuCheckStroke;    
-	private CheckMenuItem menuCheckFill;    
-	private MenuItem menuAbout;    
-	public DrawPane drawPane; 
-	
+	private MenuItem menuMove;
+	private MenuItem menuDelete;
+	private MenuItem menuStrokeWidth;
+	private MenuItem menuStrokeColor;
+	private MenuItem menuFillColor;
+	private CheckMenuItem menuCheckStroke;
+	private CheckMenuItem menuCheckFill;
+	private MenuItem menuAbout;
+	public DrawPane drawPane;
+
 	private Node borderedPane;
 	private FlowPane statusPane;
 	private Label shapeLbl;
@@ -56,10 +56,9 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 	private Label modeLbl;
 	private Label countLbl;
 	public ProgressBar progressBar;
-	
-	public ScrollPane scrollPane;
+
 	private Button button;
-	
+
 	ColorPicker strokeColorPicker = new ColorPicker(Color.BLACK);
 	ColorPicker fillColorPicker = new ColorPicker();
 
@@ -68,7 +67,7 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 		this.control = control;
 		this.model = control.model;
 		model.addListener(this);
-		
+
 		initialize();
 	}
 
@@ -89,7 +88,7 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 		menuSave = new MenuItem("Save");
 		menuSave.setOnAction(e->handleMenuSave(e));
 		menuSaveAs = new MenuItem("Save As ...");
-		menuSaveAs.setOnAction(e->handleMenuSaveAs(e)); 
+		menuSaveAs.setOnAction(e->handleMenuSaveAs(e));
 		menuExit = new MenuItem("Exit");
 		menuExit.setOnAction(e->handleMenuExit(e));
 		mFile.getItems().addAll(menuNew, menuOpen, menuSave, menuSaveAs, new SeparatorMenuItem(), menuExit);
@@ -117,7 +116,7 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 
 		menuUndo = new MenuItem("Undo");
 		menuUndo.setOnAction(e->handleMenuUndo(e));
-		
+
 		menuMove = new MenuItem("Move");
 		menuMove.setOnAction(e->handleMenuMove(e));
 
@@ -135,8 +134,8 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 		menuCheckStroke.setSelected(true);
 		menuCheckStroke.setOnAction(e->handleMenuCheckStroke(e));
 
-		//menuFillColor = new MenuItem("Fill Color", fillColorPicker);   
-		menuFillColor = new MenuItem("Fill Color");   
+		//menuFillColor = new MenuItem("Fill Color", fillColorPicker);
+		menuFillColor = new MenuItem("Fill Color");
 		menuFillColor.setOnAction(e->handleMenuFillColor(e));
 
 		menuCheckFill = new CheckMenuItem("Fill");
@@ -158,18 +157,18 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 		statusPane.setHgap(15);
 		statusPane.setPadding(new Insets(0));
 		statusPane.setPrefHeight(80);
-		
+
 		sizeLbl = new Label(model.getSizeText());
 		statusPane.getChildren().add(sizeLbl);
 		drawPane.widthProperty().addListener(obs -> {
 			double val = ((ObservableDoubleValue)obs).get();
-		    model.setPaneWidth(val);
-		    //sizeLbl.setText(model.getSizeText());
+			model.setPaneWidth(val);
+			//sizeLbl.setText(model.getSizeText());
 		});
 		drawPane.heightProperty().addListener((obs, oldVal, newVal) -> {
 			double val = ((ObservableDoubleValue)obs).get();
-		    model.setPaneHeight(val);
-		    //sizeLbl.setText(model.getSizeText());
+			model.setPaneHeight(val);
+			//sizeLbl.setText(model.getSizeText());
 		});
 
 		shapeLbl = new Label("Shape:              ");
@@ -178,57 +177,53 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 		modeLbl = new Label("Mode:               ");
 		statusPane.getChildren().add(modeLbl);
 
-		countLbl = new Label("Count:               ");		
+		countLbl = new Label("Count:               ");
 		statusPane.getChildren().add(countLbl);
-		
+
 		messageLbl = new Label("  ");
 		statusPane.getChildren().add(messageLbl);
 		statusPane.getChildren().add(new Label("                  "));
 		statusPane.getChildren().add(new Label("                  "));
 		statusPane.getChildren().add(new Label("                  "));
 		statusPane.getChildren().add(new Label("                  "));
-		
+
 		progressBar = new ProgressBar(0);
 		progressBar.setPrefWidth(150);
 		progressBar.setProgress(0);
 
 		statusPane.getChildren().add(progressBar);
-		
+
 		// Cancel ��ư �߰�
 		button = new Button("Cancel");
 		button.setOnAction(e -> control.cancel());
 		statusPane.getChildren().add(button);
-		
-		// ScrollPane���� ����
-		scrollPane = new ScrollPane();
-		scrollPane.setContent(drawPane);	
-		
-		
+
+
 		borderedPane = Borders.wrap(statusPane)
 				.etchedBorder().innerPadding(3).outerPadding(2).buildAll();
-		
-		
-		this.getChildren().addAll(menuBar, scrollPane, borderedPane);
+
+
+		this.getChildren().addAll(menuBar, drawPane, borderedPane);
 		//System.out.println("DrawPane w="+drawPane.getWidth()+" h="+drawPane.getHeight());
 
 		initDrawPane();
 
 	}
-	
+
 
 	public void initDrawPane() {
 		model.shapeList.clear();
 		model.curDrawShape = null;
 		model.polygonPoints.clear();
 		// Add Dummy Shape for Mouse Event occur
-		model.shapeList.add(new SVGGrimEllipse(new Ellipse(2000, 2000, 3, 3)));
+		model.shapeList.add(new SVGGrimEllipse(new Ellipse(800, 600, 0.1, 0.1)));
 		drawPane.redraw();
 	}
 
 	// File Menu handler
 	void handleMenuNew(ActionEvent event) {
 		initDrawPane();
-	}    
+	}
 	void handleMenuOpen(ActionEvent event) {
 		control.openAction();
 	}
@@ -257,7 +252,7 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 	}
 	void handleMenuRegular(ActionEvent event) {
 		model.setEditState(model.STATE_REGULAR);
-		Object[] possibleValues = { 
+		Object[] possibleValues = {
 				"3", "4", "5", "6", "7",
 				"8", "9", "10", "11", "12"
 		};
@@ -273,7 +268,7 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 	void handleMenuPolygon(ActionEvent event) {
 		model.setEditState(model.STATE_POLYGON);
 		drawPane.redraw();
-	}    
+	}
 
 	// Edit Menu handler
 	void handleMenuUndo(ActionEvent event) {
@@ -291,13 +286,13 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 	}
 	void handleMenuDelete(ActionEvent event) {
 
-	}    
+	}
 
 	// Setting Menu handler
 	void handleMenuStrokeColor(ActionEvent event) {
 		//model.setShapeStrokeColor(strokeColorPicker.getValue());
 		//System.out.println("stroke color="+strokeColorPicker.getValue());
-		java.awt.Color awtColor = 
+		java.awt.Color awtColor =
 				JColorChooser.showDialog(null, "Choose a color", java.awt.Color.BLACK);
 		Color jxColor = Color.BLACK;
 		if (awtColor!=null){
@@ -305,7 +300,7 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 		}
 		model.setShapeStrokeColor(jxColor);
 
-	}    
+	}
 	void handleMenuStrokeWidth(ActionEvent event) {
 
 		String inputVal = JOptionPane.showInputDialog("Stroke Width", "1");
@@ -326,7 +321,7 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 
 	void handleMenuFillColor(ActionEvent event) {
 		//model.setShapeFillColor(fillColorPicker.getValue());
-		java.awt.Color awtColor = 
+		java.awt.Color awtColor =
 				JColorChooser.showDialog(null, "Choose a color", java.awt.Color.BLACK);
 		Color jxColor = Color.BLACK;
 		if (awtColor!=null){
@@ -359,17 +354,17 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 
 		if (event.getButton()==MouseButton.PRIMARY){
 			model.editState.performMousePressed(event);
-		}		
+		}
 		drawPane.redraw();
 
-	}    
+	}
 	void handleMouseReleased(MouseEvent event) {
 
 		if (event.getButton()==MouseButton.PRIMARY){
 			model.editState.performMouseReleased(event);
 		}
 		drawPane.redraw();
-		
+
 	}
 	void handleMouseDragged(MouseEvent event) {
 
@@ -382,13 +377,23 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 	public void invalidated(Observable obs) {
 		GrimPanModel mo = (GrimPanModel)obs;
 		sizeLbl.setText(mo.getSizeText());
-		
-		shapeLbl.setText("Shape:");
 
-		modeLbl.setText("Mode:");
+		if (mo.getEditState().getStateType() < 5) {
+			shapeLbl.setText("Shape:"+(Utils.SHAPE_NAME[mo.getEditState().getStateType()]));
+		}
+		else {
+			shapeLbl.setText("Shape: ... ");
+		}
+
+		if (mo.getEditState().getStateType() >= 5) {
+			modeLbl.setText("Mode:"+(Utils.SHAPE_NAME[mo.getEditState().getStateType()]));
+		}
+		else {
+			modeLbl.setText("Mode: 입력");
+		}
 
 		countLbl.setText("Count:"+(mo.shapeList.size()-1));
-		
+
 		drawPane.redraw();
 	}
 
