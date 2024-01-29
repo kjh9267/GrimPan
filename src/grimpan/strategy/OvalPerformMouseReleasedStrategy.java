@@ -2,6 +2,7 @@ package grimpan.strategy;
 
 import grimpan.core.GrimPanModel;
 import grimpan.core.ShapeFactory;
+import grimpan.strategy.interfaces.PerformMouseReleasedStrategy;
 import grimpan.svg.SVGGrimEllipse;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
@@ -22,11 +23,11 @@ public class OvalPerformMouseReleasedStrategy implements PerformMouseReleasedStr
         model.setPrevMousePosition(model.getCurrMousePosition());
         model.setCurrMousePosition(p1);
 
-        model.curDrawShape = new SVGGrimEllipse((Ellipse)(sf.createMousePointedEllipse()));
-        if (model.curDrawShape != null){
-            model.shapeList.add(model.curDrawShape);
-            model.curDrawShape = null;
-            model.control.addShapeAction();
+        model.setCurDrawShape(new SVGGrimEllipse((Ellipse)(sf.createMousePointedEllipse())));
+        if (model.getCurDrawShape() != null){
+            model.getShapeList().add(model.getCurDrawShape());
+            model.setCurDrawShape(null);
+            model.getControl().addShapeAction();
         }
     }
 }

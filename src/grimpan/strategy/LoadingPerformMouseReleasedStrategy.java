@@ -1,5 +1,6 @@
 package grimpan.strategy;
 
+import grimpan.strategy.interfaces.PerformMouseReleasedStrategy;
 import javafx.scene.input.MouseEvent;
 
 public class LoadingPerformMouseReleasedStrategy implements PerformMouseReleasedStrategy {

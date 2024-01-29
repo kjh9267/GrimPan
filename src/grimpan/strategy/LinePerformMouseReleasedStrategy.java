@@ -2,6 +2,7 @@ package grimpan.strategy;
 
 import grimpan.core.GrimPanModel;
 import grimpan.core.ShapeFactory;
+import grimpan.strategy.interfaces.PerformMouseReleasedStrategy;
 import grimpan.svg.SVGGrimLine;
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Line;
@@ -24,11 +25,11 @@ public class LinePerformMouseReleasedStrategy implements PerformMouseReleasedStr
         model.setPrevMousePosition(model.getCurrMousePosition());
         model.setCurrMousePosition(p1);
 
-        model.curDrawShape = new SVGGrimLine((Line)(sf.createMousePointedLine()));
-        if (model.curDrawShape != null) {
-            model.shapeList.add(model.curDrawShape);
-            model.curDrawShape = null;
-            model.control.addShapeAction();
+        model.setCurDrawShape(new SVGGrimLine((Line)(sf.createMousePointedLine())));
+        if (model.getCurDrawShape() != null) {
+            model.getShapeList().add(model.getCurDrawShape());
+            model.setCurDrawShape(null);
+            model.getControl().addShapeAction();
         }
     }
 }

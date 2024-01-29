@@ -2,6 +2,7 @@ package grimpan.strategy;
 
 import grimpan.core.GrimPanModel;
 import grimpan.core.ShapeFactory;
+import grimpan.strategy.interfaces.PerformMouseDraggedStrategy;
 import grimpan.svg.SVGGrimEllipse;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
@@ -23,6 +24,6 @@ public class OvalPerformMouseDraggedStrategy implements PerformMouseDraggedStrat
         model.setPrevMousePosition(model.getCurrMousePosition());
         model.setCurrMousePosition(p1);
 
-        model.curDrawShape = new SVGGrimEllipse((Ellipse)(sf.createMousePointedEllipse()));
+        model.setCurDrawShape(new SVGGrimEllipse((Ellipse)(sf.createMousePointedEllipse())));
     }
 }

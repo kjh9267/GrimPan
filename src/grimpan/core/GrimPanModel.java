@@ -18,19 +18,21 @@ import java.util.Stack;
 public class GrimPanModel implements Observable {
 
 	private volatile static GrimPanModel uniqueModelInstance;
-	public GrimPanController control;
+
+	private GrimPanController control;
 
 	private ShapeFactory sf = ShapeFactory.getInstance(this);
 
-	public EditState editState = null;
-	public EditState savedAddState = null;
-	public final EditState STATE_REGULAR = new RegularBuilderState(this, sf);
-	public final EditState STATE_OVAL = new OvalBuilderState(this, sf);
-	public final EditState STATE_POLYGON = new PolygonBuilderState(this, sf);
-	public final EditState STATE_LINE = new LineBuilderState(this, sf);
-	public final EditState STATE_PENCIL = new PencilBuilderState(this, sf);
-	public final EditState STATE_MOVE = new MoveBuilderState(this,sf);
-	public final EditState STATE_LOADING = new LoadingState();
+	EditState editState = null;
+	private EditState savedAddState = null;
+	final EditState STATE_REGULAR = new RegularBuilderState(this, sf);
+	final EditState STATE_OVAL = new OvalBuilderState(this, sf);
+
+	final EditState STATE_POLYGON = new PolygonBuilderState(this, sf);
+	final EditState STATE_LINE = new LineBuilderState(this, sf);
+	final EditState STATE_PENCIL = new PencilBuilderState(this, sf);
+	final EditState STATE_MOVE = new MoveBuilderState(this,sf);
+	final EditState STATE_LOADING = new LoadingState();
 
 	private double shapeStrokeWidth = 10;
 	private Color shapeStrokeColor = Color.BLACK;
@@ -38,14 +40,15 @@ public class GrimPanModel implements Observable {
 	private boolean shapeFill = false;
 	private Color shapeFillColor = null;
 
-	public ObservableList<SVGGrimShape> shapeList = null;
+	private ObservableList<SVGGrimShape> shapeList = null;
 
 	private Point2D startMousePosition = null;
 	private Point2D currMousePosition = null;
 	private Point2D prevMousePosition = null;
 
-	public SVGGrimShape curDrawShape = null;
-	public ArrayList<Point2D> polygonPoints = null;
+	private SVGGrimShape curDrawShape = null;
+
+	private ArrayList<Point2D> polygonPoints = null;
 	private int selectedShapeIndex = -1;
 
 	private int nPolygon = 3;
@@ -58,9 +61,10 @@ public class GrimPanModel implements Observable {
 	private Point2D movedPos = null;
 
 	private ArrayList<InvalidationListener> listenerList = null;
-	public Stack<Command> undoCommandStack = null;
 
-	public PropertyManager grimpanPM = null;
+	private Stack<Command> undoCommandStack = null;
+
+	private PropertyManager grimpanPM = null;
 
 
 	public static GrimPanModel getInstance(GrimPanController control) {
@@ -106,6 +110,38 @@ public class GrimPanModel implements Observable {
 		for (InvalidationListener lis : this.listenerList) {
 			lis.invalidated(this);
 		}
+	}
+
+	public ObservableList<SVGGrimShape> getShapeList() {
+		return shapeList;
+	}
+
+	public Stack<Command> getUndoCommandStack() {
+		return undoCommandStack;
+	}
+
+	public void setUndoCommandStack(Stack<Command> undoCommandStack) {
+		this.undoCommandStack = undoCommandStack;
+	}
+
+	public ArrayList<Point2D> getPolygonPoints() {
+		return polygonPoints;
+	}
+
+	public void setPolygonPoints(ArrayList<Point2D> polygonPoints) {
+		this.polygonPoints = polygonPoints;
+	}
+
+	public GrimPanController getControl() {
+		return control;
+	}
+
+	public SVGGrimShape getCurDrawShape() {
+		return curDrawShape;
+	}
+
+	public void setCurDrawShape(SVGGrimShape curDrawShape) {
+		this.curDrawShape = curDrawShape;
 	}
 
 	public EditState getEditState() {

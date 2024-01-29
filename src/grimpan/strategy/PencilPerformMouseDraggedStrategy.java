@@ -2,6 +2,7 @@ package grimpan.strategy;
 
 import grimpan.core.GrimPanModel;
 import grimpan.core.ShapeFactory;
+import grimpan.strategy.interfaces.PerformMouseDraggedStrategy;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.LineTo;
@@ -22,6 +23,6 @@ public class PencilPerformMouseDraggedStrategy implements PerformMouseDraggedStr
         model.setPrevMousePosition(model.getCurrMousePosition());
         model.setCurrMousePosition(p1);
 
-        ((Path)model.curDrawShape.getShape()).getElements().add(new LineTo(p1.getX(), p1.getY()));
+        ((Path)model.getCurDrawShape().getShape()).getElements().add(new LineTo(p1.getX(), p1.getY()));
     }
 }

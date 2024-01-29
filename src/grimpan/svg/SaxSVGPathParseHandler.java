@@ -14,22 +14,30 @@ import javafx.scene.shape.Polyline;
 import javafx.scene.shape.SVGPath;
 
 public class SaxSVGPathParseHandler extends DefaultHandler{
-	
-	public GrimPanPaneView view;
-	public GrimPanController control;
 
-	public ObservableList<SVGGrimShape> gshapeList = null;
+	private Thread thread;
+
+	private GrimPanPaneView view;
+	private GrimPanController control;
+
+	private ObservableList<SVGGrimShape> gshapeList = null;
 	private GrimPanController.SVGParseTask task = null;
-	public SaxSVGPathParseHandler(GrimPanController.SVGParseTask task){
+	public SaxSVGPathParseHandler(GrimPanController.SVGParseTask task, Thread thread){
+		this.thread = thread;
 		this.gshapeList = FXCollections.observableArrayList();
 		this.task = task;
 	}
+
+	public ObservableList<SVGGrimShape> getGshapeList() {
+		return gshapeList;
+	}
+
 	@Override
 	public void startElement(String uri, String qName, String lName, Attributes atts){
 		//System.out.println("start lName="+lName);
 		if (lName.equals("path")){
 			SVGPath svgPath = new SVGPath();
-			String pathDef = atts.getValue("d");			
+			String pathDef = atts.getValue("d");
 			//System.out.println("d="+pathDef);
 			String styleDef = atts.getValue("style");
 			if (styleDef!=null && !styleDef.equals("")){
@@ -84,7 +92,7 @@ public class SaxSVGPathParseHandler extends DefaultHandler{
 			Polygon polygon = new Polygon();
 			String styleDef = atts.getValue("style");
 			SVGUtils.paintShapeWithSVGStyle(polygon, styleDef);
-			
+
 			String spoints = atts.getValue("points");
 			String[] spairs = spoints.split("\\s");
 			ObservableList<Double> points = polygon.getPoints();
@@ -99,7 +107,7 @@ public class SaxSVGPathParseHandler extends DefaultHandler{
 			Polyline polyline = new Polyline();
 			String styleDef = atts.getValue("style");
 			SVGUtils.paintShapeWithSVGStyle(polyline, styleDef);
-			
+
 			String spoints = atts.getValue("points");
 			String[] spairs = spoints.split("\\s");
 			ObservableList<Double> points = polyline.getPoints();
@@ -112,9 +120,9 @@ public class SaxSVGPathParseHandler extends DefaultHandler{
 		}
 		// progress bar�� ���� thread sleep
 		try {
-			control.thread.sleep(100);
+			thread.sleep(100);
 		} catch (InterruptedException e) {
-			control.thread.interrupt();
-		} 
+			thread.interrupt();
+		}
 	}
 }

@@ -2,6 +2,7 @@ package grimpan.strategy;
 
 import grimpan.core.GrimPanModel;
 import grimpan.core.ShapeFactory;
+import grimpan.strategy.interfaces.PerformMouseReleasedStrategy;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.LineTo;
@@ -22,11 +23,11 @@ public class PencilPerformMouseReleasedStrategy implements PerformMouseReleasedS
         model.setPrevMousePosition(model.getCurrMousePosition());
         model.setCurrMousePosition(p1);
 
-        ((Path)model.curDrawShape.getShape()).getElements().add(new LineTo(p1.getX(), p1.getY()));
-        if (model.curDrawShape != null){
-            model.shapeList.add(model.curDrawShape);
-            model.curDrawShape = null;
-            model.control.addShapeAction();
+        ((Path)model.getCurDrawShape().getShape()).getElements().add(new LineTo(p1.getX(), p1.getY()));
+        if (model.getCurDrawShape() != null){
+            model.getShapeList().add(model.getCurDrawShape());
+            model.setCurDrawShape(null);
+            model.getControl().addShapeAction();
         }
     }
 }

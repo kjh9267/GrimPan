@@ -14,15 +14,15 @@ public class AddCommand implements Command {
 
 	@Override
 	public void execute() {
-		if (model.curDrawShape != null){
-			model.shapeList.add(grimShape);
-			model.curDrawShape = null;
+		if (model.getCurDrawShape() != null){
+			model.getShapeList().add(grimShape);
+			model.setCurDrawShape(null);
 		}
 	}
 
 	@Override
 	public void undo() {
-		model.shapeList.remove(model.shapeList.size()-1);
+		model.getShapeList().remove(model.getShapeList().size()-1);
 	}
 
 }

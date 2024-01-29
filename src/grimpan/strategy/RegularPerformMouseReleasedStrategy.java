@@ -2,7 +2,9 @@ package grimpan.strategy;
 
 import grimpan.core.GrimPanModel;
 import grimpan.core.ShapeFactory;
+import grimpan.strategy.interfaces.PerformMouseReleasedStrategy;
 import grimpan.svg.SVGGrimPath;
+import grimpan.svg.SVGGrimShape;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Path;
@@ -22,11 +24,12 @@ public class RegularPerformMouseReleasedStrategy implements PerformMouseReleased
         model.setPrevMousePosition(model.getCurrMousePosition());
         model.setCurrMousePosition(p1);
 
-        model.curDrawShape = new SVGGrimPath((Path)(sf.createRegularPolygon(model.getNPolygon())));
-        if (model.curDrawShape != null){
-            model.shapeList.add(model.curDrawShape);
-            model.curDrawShape = null;
-            model.control.addShapeAction();
+        model.setCurDrawShape(new SVGGrimPath((Path)(sf.createRegularPolygon(model.getNPolygon()))));
+        SVGGrimShape curDrawShape = model.getCurDrawShape();
+        if (curDrawShape != null){
+            model.getShapeList().add(curDrawShape);
+            model.setCurDrawShape(null);
+            model.getControl().addShapeAction();
         }
     }
 }

@@ -2,6 +2,7 @@ package grimpan.strategy;
 
 import grimpan.core.GrimPanModel;
 import grimpan.core.ShapeFactory;
+import grimpan.strategy.interfaces.PerformMouseDraggedStrategy;
 import grimpan.svg.SVGGrimPath;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
@@ -22,6 +23,6 @@ public class RegularPerformMouseDraggedStrategy implements PerformMouseDraggedSt
         model.setPrevMousePosition(model.getCurrMousePosition());
         model.setCurrMousePosition(p1);
 
-        model.curDrawShape = new SVGGrimPath((Path)(sf.createRegularPolygon(model.getNPolygon())));
+        model.setCurDrawShape(new SVGGrimPath((Path)(sf.createRegularPolygon(model.getNPolygon()))));
     }
 }

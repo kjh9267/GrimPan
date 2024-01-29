@@ -98,7 +98,7 @@ public class ShapeFactory {
 	}
 
 	public Shape createPolygonFromClickedPoints(){
-		ArrayList<Point2D> points = model.polygonPoints;
+		ArrayList<Point2D> points = model.getPolygonPoints();
 		Polygon result = new Polygon();
 		if (points != null && points.size() > 2) {
 			for (int i=0; i<points.size(); ++i){
@@ -109,7 +109,7 @@ public class ShapeFactory {
 		return createPaintedShape(result);
 	}
 	public Shape createPolylineFromClickedPoints(){
-		ArrayList<Point2D> points = model.polygonPoints;
+		ArrayList<Point2D> points = model.getPolygonPoints();
 		Polyline result = new Polyline();
 		if (points != null && points.size() > 0) {
 			for (int i=0; i<points.size(); ++i){

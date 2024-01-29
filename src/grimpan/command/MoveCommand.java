@@ -17,12 +17,12 @@ public class MoveCommand implements Command {
 
 	@Override
 	public void execute() {
-		movedShape = model.shapeList.get(model.getSelectedShapeIndex());
+		movedShape = model.getShapeList().get(model.getSelectedShapeIndex());
 	}
 
 	@Override
 	public void undo() {
-		int selIndex = model.shapeList.indexOf(movedShape);
+		int selIndex = model.getShapeList().indexOf(movedShape);
 		if (selIndex != -1){
 			ShapeFactory.translateShape(movedShape.getShape(), -movedPos.getX(), -movedPos.getY());
 			//model.shapeList.set(selIndex, movedShape);

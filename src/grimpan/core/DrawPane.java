@@ -22,11 +22,11 @@ public class DrawPane extends Pane {
 	public void redraw() {
 		clear();
 		//System.out.println("Shape Count="+model.shapeList.size());
-		for (SVGGrimShape gsh:model.shapeList){
+		for (SVGGrimShape gsh:model.getShapeList()){
 			this.getChildren().add(gsh.getShape());
 		}
-		if (model.curDrawShape!=null && model.curDrawShape.getShape()!=null) {
-			this.getChildren().add(model.curDrawShape.getShape());
+		if (model.getCurDrawShape()!=null && model.getCurDrawShape().getShape()!=null) {
+			this.getChildren().add(model.getCurDrawShape().getShape());
 			//System.out.println(model.shapeList);
 		}
 	}

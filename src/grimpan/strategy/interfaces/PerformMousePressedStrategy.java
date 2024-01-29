@@ -1,4 +1,4 @@
-package grimpan.strategy;
+package grimpan.strategy.interfaces;
 
 import javafx.scene.input.MouseEvent;
 

@@ -1,6 +1,8 @@
 package grimpan.state;
 
-import grimpan.strategy.*;
+import grimpan.strategy.interfaces.PerformMouseDraggedStrategy;
+import grimpan.strategy.interfaces.PerformMousePressedStrategy;
+import grimpan.strategy.interfaces.PerformMouseReleasedStrategy;
 import javafx.scene.input.MouseEvent;
 
 public abstract class EditState {
@@ -8,14 +10,14 @@ public abstract class EditState {
 	PerformMouseReleasedStrategy performMouseReleasedStrategy;
 	PerformMouseDraggedStrategy performMouseDraggedStrategy;
 
-	public static final int SHAPE_REGULAR = 0;
-	public static final int SHAPE_OVAL = 1;
-	public static final int SHAPE_POLYGON = 2;
-	public static final int SHAPE_LINE = 3;
-	public static final int SHAPE_PENCIL = 4;
-	public static final int EDIT_MOVE = 5;
-	public static final int EDIT_DELETE = 6;
-	public static final int EDIT_LOADING = 7;
+	static final int SHAPE_REGULAR = 0;
+	static final int SHAPE_OVAL = 1;
+	static final int SHAPE_POLYGON = 2;
+	static final int SHAPE_LINE = 3;
+	static final int SHAPE_PENCIL = 4;
+	static final int EDIT_MOVE = 5;
+	static final int EDIT_DELETE = 6;
+	static final int EDIT_LOADING = 7;
 
 	
 	public void performMousePressed(MouseEvent e){ performMousePressedStrategy.performMousePressed(e); };

@@ -2,6 +2,7 @@ package grimpan.strategy;
 
 import grimpan.core.GrimPanModel;
 import grimpan.core.ShapeFactory;
+import grimpan.strategy.interfaces.PerformMouseReleasedStrategy;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
@@ -29,14 +30,14 @@ public class MovePerformMouseReleasedStrategy implements PerformMouseReleasedStr
             double dy = model.getCurrMousePosition().getY() - model.getStartMousePosition().getY();
             model.setMovedPos(new Point2D(dx, dy));
 
-            model.control.moveShapeAction();
+            model.getControl().moveShapeAction();
         }
     }
     private void endShapeMove(){
         int selIndex = model.getSelectedShapeIndex();
         Shape shape = null;
         if (selIndex != -1){
-            shape = model.shapeList.get(selIndex).getShape();
+            shape = model.getShapeList().get(selIndex).getShape();
             Color scolor = (Color)shape.getStroke();
             Color fcolor = (Color)shape.getFill();
             if (shape.getStroke()!=Color.TRANSPARENT){

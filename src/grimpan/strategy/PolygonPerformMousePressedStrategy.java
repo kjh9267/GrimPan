@@ -2,6 +2,7 @@ package grimpan.strategy;
 
 import grimpan.core.GrimPanModel;
 import grimpan.core.ShapeFactory;
+import grimpan.strategy.interfaces.PerformMousePressedStrategy;
 import grimpan.svg.SVGGrimPolygon;
 import grimpan.svg.SVGGrimPolyline;
 import javafx.geometry.Point2D;
@@ -25,17 +26,19 @@ public class PolygonPerformMousePressedStrategy implements PerformMousePressedSt
         model.setCurrMousePosition(p1);
         model.setPrevMousePosition(p1);
 
-        model.polygonPoints.add(model.getCurrMousePosition());
+        model.getPolygonPoints().add(model.getCurrMousePosition());
         if (event.isShiftDown()) {
+
+
             //((Path)model.curDrawShape).getElements().add(new ClosePath());
-            model.curDrawShape = new SVGGrimPolygon((Polygon)(sf.createPolygonFromClickedPoints()));
-            model.polygonPoints.clear();
-            model.shapeList.add(model.curDrawShape);
-            model.curDrawShape = null;
-            model.control.addShapeAction();
+            model.setCurDrawShape(new SVGGrimPolygon((Polygon)(sf.createPolygonFromClickedPoints())));
+            model.getPolygonPoints().clear();
+            model.getShapeList().add(model.getCurDrawShape());
+            model.setCurDrawShape(null);
+            model.getControl().addShapeAction();
         }
         else {
-            model.curDrawShape = new SVGGrimPolyline((Polyline)(sf.createPolylineFromClickedPoints()));
+            model.setCurDrawShape(new SVGGrimPolyline((Polyline)(sf.createPolylineFromClickedPoints())));
         }
     }
 }

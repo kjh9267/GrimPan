@@ -24,7 +24,7 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 
 	private GrimPanController control;
 	private GrimPanModel model;
-	public Stage parentStage;
+	Stage parentStage;
 
 	private MenuItem menuNew;
 	private MenuItem menuOpen;
@@ -46,7 +46,7 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 	private CheckMenuItem menuCheckStroke;
 	private CheckMenuItem menuCheckFill;
 	private MenuItem menuAbout;
-	public DrawPane drawPane;
+	DrawPane drawPane;
 
 	private Node borderedPane;
 	private FlowPane statusPane;
@@ -55,7 +55,7 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 	private Label messageLbl;
 	private Label modeLbl;
 	private Label countLbl;
-	public ProgressBar progressBar;
+	ProgressBar progressBar;
 
 	private Button button;
 
@@ -212,11 +212,11 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 
 
 	public void initDrawPane() {
-		model.shapeList.clear();
-		model.curDrawShape = null;
-		model.polygonPoints.clear();
+		model.getShapeList().clear();
+		model.setCurDrawShape(null);
+		model.getPolygonPoints().clear();
 		// Add Dummy Shape for Mouse Event occur
-		model.shapeList.add(new SVGGrimEllipse(new Ellipse(800, 600, 0.1, 0.1)));
+		model.getShapeList().add(new SVGGrimEllipse(new Ellipse(800, 600, 0.1, 0.1)));
 		drawPane.redraw();
 	}
 
@@ -278,9 +278,9 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 	void handleMenuMove(ActionEvent event) {
 
 		model.setEditState(model.STATE_MOVE);
-		if (model.curDrawShape != null){
-			model.shapeList.add(model.curDrawShape);
-			model.curDrawShape = null;
+		if (model.getCurDrawShape() != null){
+			model.getShapeList().add(model.getCurDrawShape());
+			model.setCurDrawShape(null);
 		}
 		drawPane.redraw();
 	}
@@ -392,7 +392,7 @@ public class GrimPanPaneView extends VBox implements InvalidationListener {
 			modeLbl.setText("Mode: 입력");
 		}
 
-		countLbl.setText("Count:"+(mo.shapeList.size()-1));
+		countLbl.setText("Count:"+(mo.getShapeList().size()-1));
 
 		drawPane.redraw();
 	}

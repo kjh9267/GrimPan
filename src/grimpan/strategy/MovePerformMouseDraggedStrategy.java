@@ -2,6 +2,7 @@ package grimpan.strategy;
 
 import grimpan.core.GrimPanModel;
 import grimpan.core.ShapeFactory;
+import grimpan.strategy.interfaces.PerformMouseDraggedStrategy;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Shape;
@@ -30,7 +31,7 @@ public class MovePerformMouseDraggedStrategy implements PerformMouseDraggedStrat
         int selIndex = model.getSelectedShapeIndex();
         Shape shape = null;
         if (selIndex != -1){
-            shape = model.shapeList.get(selIndex).getShape();
+            shape = model.getShapeList().get(selIndex).getShape();
             double dx = model.getCurrMousePosition().getX() - model.getPrevMousePosition().getX();
             double dy = model.getCurrMousePosition().getY() - model.getPrevMousePosition().getY();
 

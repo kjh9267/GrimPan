@@ -26,10 +26,10 @@ import javafx.stage.FileChooser.ExtensionFilter;
 
 public class GrimPanController {
 
-	public static Thread thread = null;
-	public GrimPanModel model = null;
-	public GrimPanPaneView view = null;
-	public boolean key = false;
+	Thread thread = null;
+	GrimPanModel model = null;
+	GrimPanPaneView view = null;
+	private boolean key = false;
 
 	public GrimPanController(){		
 		this.model = GrimPanModel.getInstance(this);
@@ -83,7 +83,7 @@ public class GrimPanController {
 				ObservableList<SVGGrimShape> parseShapeList = parseTask.getValue();
 
 				for (SVGGrimShape gsh:parseShapeList) {
-					model.shapeList.add(gsh);
+					model.getShapeList().add(gsh);
 				}
 
 				String fileName = model.getSaveFile().getName();
@@ -151,30 +151,30 @@ public class GrimPanController {
 		svgout.print("width='"+view.getWidth()+"' ");
 		svgout.print("height='"+view.getHeight()+"' ");
 		svgout.println("overflow='visible' xml:space='preserve'>");
-		for (SVGGrimShape gs:model.shapeList){
+		for (SVGGrimShape gs:model.getShapeList()){
 			svgout.println("    "+gs.getSVGShapeString());
 		}
 		svgout.println("</grimpan.svg>");
 		svgout.close();
 	}
 	public void addShapeAction() {
-		Command addCommand = new AddCommand(model, model.curDrawShape);
-		model.undoCommandStack.push(addCommand);// save for undo
+		Command addCommand = new AddCommand(model, model.getCurDrawShape());
+		model.getUndoCommandStack().push(addCommand);// save for undo
 		addCommand.execute();
 		model.notifyListeners();
 	}
 
 	public void moveShapeAction() {
 		Command moveCommand = new MoveCommand(model, model.getMovedPos());
-		model.undoCommandStack.push(moveCommand);// save for undo
+		model.getUndoCommandStack().push(moveCommand);// save for undo
 		moveCommand.execute();
 		model.notifyListeners();
 	}
 	public void undoAction() {
-		if (model.undoCommandStack.isEmpty())
+		if (model.getUndoCommandStack().isEmpty())
 			return;
 
-		Command comm = model.undoCommandStack.pop();
+		Command comm = model.getUndoCommandStack().pop();
 		comm.undo();
 
 		model.notifyListeners();
@@ -193,8 +193,8 @@ public class GrimPanController {
 		@Override
 		protected ObservableList<SVGGrimShape> call() throws Exception {
 
-			SaxSVGPathParseHandler saxTreeHandler = new SaxSVGPathParseHandler(this); 
-			this.gshapeList = saxTreeHandler.gshapeList;
+			SaxSVGPathParseHandler saxTreeHandler = new SaxSVGPathParseHandler(this, thread);
+			this.gshapeList = saxTreeHandler.getGshapeList();
 			this.gshapeList.addListener((ListChangeListener.Change<? extends SVGGrimShape> change) ->{
 				while(change.next()){
 					if(change.wasAdded()){
@@ -213,7 +213,7 @@ public class GrimPanController {
 				e.printStackTrace();
 			}
 
-			return saxTreeHandler.gshapeList;
+			return saxTreeHandler.getGshapeList();
 		}
 
 	}
